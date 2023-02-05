@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
-const Comments = () => {
+const Comments = ({ slug }) => {
   return (
-    <div>
+    <div className="bg-white">
       <h2>Comments</h2>
     </div>
   );

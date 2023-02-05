@@ -1,9 +1,117 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { submitComment } from "@/services";
 
-const CommentsForm = () => {
+const CommentsForm = ({ slug }) => {
+  const [error, setError] = useState(false);
+  const [localStorage, setLocalStorage] = useState(null);
+  const [showSuccesMessage, setShowSuccesMessage] = useState(false);
+  const commentEl = useRef();
+  const nameEl = useRef();
+  const emailEl = useRef();
+  const storeDataEl = useRef();
+
+  useEffect(() => {
+    nameEl.current.value = window.localStorage.getItem("name");
+    emailEl.current.value = window.localStorage.getItem("email");
+  }, []);
+
+  const handleCommentSubmission = () => {
+    setError(false);
+
+    const comment = commentEl.current.value;
+    const name = nameEl.current.value;
+    const email = emailEl.current.value;
+    const storeData = storeDataEl.current.checked;
+
+    if (!comment || !name || !email) {
+      setError(true);
+      return;
+    }
+
+    const commentObj = {
+      name,
+      email,
+      comment,
+      slug,
+    };
+
+    if (storeData) {
+      window.localStorage.setItem("name", name);
+      window.localStorage.setItem("email", email);
+    } else {
+      window.localStorage.removeItem("name", name);
+      window.localStorage.removeItem("email", email);
+    }
+
+    submitComment(commentObj).then((res) => {
+      setShowSuccesMessage(true);
+      setTimeout(() => {
+        setShowSuccesMessage(false);
+      }, 3000);
+    });
+  };
+
   return (
-    <div>
-      <h2>CommentsForm</h2>
+    <div className="bg-white shadow-lg rounded-lg p-8 pb-12 mb-8">
+      <span className="block  text-xl mb-8 font-semibold border-b pb-4">
+        Leave a comment
+      </span>
+      <div className="grid grid-cols-1 gap-4 mb-4">
+        <textarea
+          ref={commentEl}
+          className="p-4 outline-none w-full rounded-lg focus:ring-2 focus:ring-gray-200 bg-gray-100 text-gray-700"
+          placeholder="Comment"
+          name="comment"
+        ></textarea>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <input
+          type="text"
+          ref={nameEl}
+          className="py-2 px-4 outline-none w-full rounded-lg focus:ring-2 focus:ring-gray-200 bg-gray-100 text-gray-700"
+          placeholder="Name"
+          name="name"
+        />
+        <input
+          type="text"
+          ref={emailEl}
+          className="py-2 px-4 outline-none w-full rounded-lg focus:ring-2 focus:ring-gray-200 bg-gray-100 text-gray-700"
+          placeholder="Email"
+          name="email"
+        />
+        <div className="grid grid-cols-1 gap-4 mb-4">
+          <div>
+            <input
+              ref={storeDataEl}
+              type="checkbox"
+              id="storeData"
+              name="storeData"
+              value="true"
+            />
+            <label
+              className="text-gray-500 cursor-pointer ml-2"
+              htmlFor="storeData"
+            >
+              Save my email and name for the next time I comment
+            </label>
+          </div>
+        </div>
+      </div>
+      {error && <p className="tex-xs text-red-500">All fields are required</p>}
+      <div className="mt-8">
+        <button
+          type="button"
+          onClick={handleCommentSubmission}
+          className="transition duration-500 ease hover:bg-indigo-900 inline-block bg-pink-600 text-lg rounded-xl text-white px-8 py-3 cursor-pointer"
+        >
+          Send Comment!
+        </button>
+        {showSuccesMessage && (
+          <span className="text-xl float-right font-semibold mt-3 text-green-500">
+            Comment Submitted for review
+          </span>
+        )}
+      </div>
     </div>
   );
 };
