@@ -144,4 +144,3 @@ export const submitComment = async (obj) => {
 
   return result.json();
 };
-\
